@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "puppeteer": "^2.0.0"
+  },
+  "scripts": {
+    "backup": "node src/index.js"
+  },
+  "name": "hoststar-backup-downloader",
+  "version": "1.0.0",
+  "description": "Download Backups from Hoststar",
+  "main": "src/index.js",
+  "repository": "https://github.com/GenieTim/hoststar-backup-downloader",
+  "author": "Tim Bernhard",
+  "license": "GPLv3",
+  "private": false
+}
