@@ -4,10 +4,12 @@ const https = require('https')
 
 class HoststarClient {
   constructor(logger, config) {
+    this.loggedIn = false
     this.logger = logger
+    // read shortcut config properties
     this.config = config
     this.debug = config.debug
-    this.loggedIn = false
+    // set default urls to be used/visited
     this.baseUrl = 'https://my.hoststar.ch'
     this.loginUrl = this.baseUrl + '/login'
     this.backupUrl = this.baseUrl + '/hosting/backup-lx'
@@ -72,6 +74,7 @@ class HoststarClient {
     await this.randomSleep(1000)
     let runSelector = '#frame .content .hsBox.withBlockLayout'
     let backupRuns = await this.driver.$$(runSelector)
+    let promises = [];
     for await (const [runIdx, backupRun] of backupRuns.entries()) {
       this.log('Handling backuprun ' + (runIdx + 1) + '/' + backupRuns.length)
       let runClickSelector = '.withSwingAction .gather'
@@ -100,12 +103,13 @@ class HoststarClient {
           }
           // fortunately, hoststar does not check the login upon opening such a URL,
           // so we can download through node instead of through pupeteer/Chrome
-          await this.downloadFile(url)
+          promises.push(this.downloadFile(url))
           this.randomSleep(1000)
         }
       }
     }
 
+    await Promise.all(promises)
     this.log('Done downloading backups.')
   }
 
@@ -118,9 +122,13 @@ class HoststarClient {
     let self = this
     return new Promise(resolve => {
       let filename = url.split('/').pop().split('#')[0].split('?')[0]
-      let destFilename = self.config.destDir + "/" + filename
-      const file = fs.createWriteStream(destFilename)
-      self.log('Writing from "' + url + '" to ' + destFilename)
+      let destFile = self.config.destDir + "/" + filename
+      if (fs.existsSync(destFile)) {
+        self.log('File "' + destFile + '" already exists. Skipping.')
+        resolve()
+      }
+      const file = fs.createWriteStream(destFile)
+      self.log('Writing from "' + url + '" to ' + destFile)
       const request = https.get(url, function (response) {
         response.pipe(file);
         file.on('finish', function () {
@@ -164,6 +172,9 @@ class HoststarClient {
     }
   }
 
+  /**
+   * Reset this instance
+   */
   destroy() {
     return this.driver.close()
   }
