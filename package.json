@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "puppeteer": "^20.8.1"
+    "puppeteer": "^21.3.8"
   },
   "scripts": {
     "backup": "node src/index.js"
