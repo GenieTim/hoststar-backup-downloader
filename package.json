@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "puppeteer": "^24.37.5"
+    "puppeteer": "^24.40.0"
   },
   "scripts": {
     "backup": "node src/index.js"
